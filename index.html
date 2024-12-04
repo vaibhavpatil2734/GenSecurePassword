@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <div class="container">
+        <h1>Password Generator</h1>
+        <input type="number" id="passwordLength" min="8" max="20" value="16" placeholder="Length (8-20)">
+        <input type="text" id="password" placeholder="Password will appear here">
+        <button id="copyButton" class="button">Copy Password</button>
+        <button id="generateButton" class="button">Generate Password</button>
+        <div class="show"><span id="generatedPassword"></span></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
