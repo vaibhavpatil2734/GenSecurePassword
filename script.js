@@ -1,48 +1,96 @@
 const generateButton = document.getElementById("generateButton");
 const copyButton = document.getElementById("copyButton");
+const toggleButton = document.getElementById("toggleVisibility");
 const show = document.querySelector(".show");
 const passwordInput = document.getElementById("password");
 const passwordLengthInput = document.getElementById("passwordLength");
 const userTextInput = document.getElementById("userText");
 
+const includeLowercase = document.getElementById("includeLowercase");
+const includeUppercase = document.getElementById("includeUppercase");
+const includeNumbers = document.getElementById("includeNumbers");
+const includeSymbols = document.getElementById("includeSymbols");
+
+const strengthIndicator = document.getElementById("strengthIndicator");
+
+toggleButton.onclick = function () {
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleButton.textContent = "Hide";
+    } else {
+        passwordInput.type = "password";
+        toggleButton.textContent = "Show";
+    }
+};
+
 generateButton.onclick = function generatePassword() {
-    const character = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*_";
+    let characterSet = "";
+
+    if (includeLowercase.checked) characterSet += "abcdefghijklmnopqrstuvwxyz";
+    if (includeUppercase.checked) characterSet += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    if (includeNumbers.checked) characterSet += "0123456789";
+    if (includeSymbols.checked) characterSet += "!@#$%^&*_";
+
+    if (characterSet === "") {
+        alert("Please select at least one character type.");
+        return;
+    }
+
     let pwdLength = parseInt(passwordLengthInput.value) || 16;
     let userText = userTextInput.value.trim();
     let password = "";
 
-    // Ensure password length is between 8 and 20
     pwdLength = Math.max(8, Math.min(20, pwdLength));
 
-    // Validate that user-provided text does not exceed half the password length
     const maxUserTextLength = Math.floor(pwdLength / 2);
     if (userText.length > maxUserTextLength) {
-        alert(`The provided custom text is more than 50%`);
+        alert(`The provided custom text is more than 50% of password length.`);
         return;
     }
 
-    // Calculate lengths for characters before and after the user-provided text
     let remainingLength = pwdLength - userText.length;
     let beforeLength = Math.floor(remainingLength / 2);
     let afterLength = remainingLength - beforeLength;
 
-    // Generate random characters before and after the user-provided text
-    let beforeText = "";
-    let afterText = "";
+    let beforeText = "", afterText = "";
     for (let i = 0; i < beforeLength; i++) {
-        let generatePwd = Math.floor(Math.random() * character.length);
-        beforeText += character.substring(generatePwd, generatePwd + 1);
+        let rand = Math.floor(Math.random() * characterSet.length);
+        beforeText += characterSet.charAt(rand);
     }
     for (let i = 0; i < afterLength; i++) {
-        let generatePwd = Math.floor(Math.random() * character.length);
-        afterText += character.substring(generatePwd, generatePwd + 1);
+        let rand = Math.floor(Math.random() * characterSet.length);
+        afterText += characterSet.charAt(rand);
     }
 
-    // Combine parts to form the final password
     password = beforeText + userText + afterText;
-
     passwordInput.value = password;
+
+    evaluateStrength(password);
 };
+
+function evaluateStrength(password) {
+    let score = 0;
+    if (/[a-z]/.test(password)) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+    if (password.length >= 12) score++;
+
+    let strength = "";
+    if (score <= 2) {
+        strength = "Weak";
+        strengthIndicator.style.color = "red";
+    } else if (score === 3 || score === 4) {
+        strength = "Medium";
+        strengthIndicator.style.color = "orange";
+    } else {
+        strength = "Strong";
+        strengthIndicator.style.color = "green";
+    }
+
+    strengthIndicator.textContent = `Strength: ${strength}`;
+}
 
 copyButton.onclick = function copyPwd() {
     const passwordValue = passwordInput.value;
@@ -57,6 +105,7 @@ copyButton.onclick = function copyPwd() {
                 show.classList.remove("active");
             }, 2000);
             passwordInput.value = "";
+            strengthIndicator.textContent = "";
         }).catch(function () {
             alert("Failed to copy password. Try again.");
         });
